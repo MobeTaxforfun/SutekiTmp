@@ -1,0 +1,12 @@
+﻿
+@{
+    ViewData["Title"] = "LoginByCustomAuth";
+}
+
+<h1>LoginByCustomAuth</h1>
+
+<form method="post" href="@Url.Action("LoginCookieAuth","Home")">
+    UserName : <input id="UserName" name="UserName" />
+    PassWord : <input id="PassWord" name="PassWord" />
+    <button>submit</button>
+</form>
