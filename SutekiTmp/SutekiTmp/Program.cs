@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Tokens;
 using SutekiTmp.Domain.Common.Authentication;
+using SutekiTmp.Domain.Common.Authentication.Session;
 using SutekiTmp.Domain.Repository.IRepository;
 using SutekiTmp.Domain.Repository.Repository;
 using SutekiTmp.Domain.Service.IService;
@@ -18,9 +19,21 @@ builder.Services.AddSession(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<ILoginService, LoginService>();
+builder.Services.AddOptions<SessionAuthenticationOptions>();
+
+builder.Services.AddAuthorization(opt =>
+{
+    opt.AddPolicy("demo2", c =>
+    {
+        c.AddAuthenticationSchemes(SessionAuthenticationHandler.TEST_SCHEM_NAME);
+        c.RequireAuthenticatedUser();
+    });
+});
+
 
 builder.Services.AddAuthentication(options =>
 {
+
     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })

@@ -1,9 +1,10 @@
-﻿using SutekiTmp.Viewmodels.Login;
+﻿using SutekiTmp.Models.Temp;
+using SutekiTmp.Viewmodels.Login;
 
 namespace SutekiTmp.Domain.Service.IService
 {
     public interface ILoginService
     {
-        public LoginViewModel GetUser(LoginViewModel loginViewModel);
+        public UserModel GetUser(LoginViewModel loginViewModel);
     }
 }

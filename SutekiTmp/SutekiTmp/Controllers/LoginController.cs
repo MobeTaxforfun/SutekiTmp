@@ -47,7 +47,7 @@ namespace SutekiTmp.Controllers
                 List<Claim> claims = new List<Claim>()
                 {
                     new Claim(ClaimTypes.Name,UserName),
-                    new Claim("","")
+                    new Claim(ClaimTypes.Email,validUser.Email),
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -80,7 +80,7 @@ namespace SutekiTmp.Controllers
             if (validUser != null)
             {
                 var claimIdentity = new ClaimsIdentity(CustomAuthenticationOptions.Scheme);
-                claimIdentity.AddClaim(new Claim(ClaimTypes.Name, "jim"));
+                claimIdentity.AddClaim(new Claim("UserId", validUser.UserId.ToString()));
                 var properties = new AuthenticationProperties
                 {
                     IsPersistent = true
@@ -90,6 +90,18 @@ namespace SutekiTmp.Controllers
             }
 
             return Unauthorized();
+        }
+
+
+        public IActionResult LoginBySession()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult LoginBySession(string UserName, string Password)
+        {
+            return View();
         }
     }
 }

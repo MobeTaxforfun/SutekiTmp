@@ -25,6 +25,7 @@ namespace SutekiTmp.Domain.Common.Authentication
         public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties? properties)
         {
             var ticket = new AuthenticationTicket(user, properties, Scheme.Name);
+            var UserId = user.Claims.First(c=>c.Type == "UserId").Value;
             Context.Session.SetString("IsAuth", "true");
 
             return Task.CompletedTask;

@@ -1,5 +1,6 @@
 ﻿using SutekiTmp.Domain.Repository.IRepository;
 using SutekiTmp.Domain.Service.IService;
+using SutekiTmp.Models.Temp;
 using SutekiTmp.Viewmodels.Login;
 
 namespace SutekiTmp.Domain.Service.Service
@@ -11,12 +12,13 @@ namespace SutekiTmp.Domain.Service.Service
         {
             _UserRepository = UserRepository;
         }
-        public LoginViewModel GetUser(LoginViewModel loginViewModel)
+        public UserModel GetUser(LoginViewModel loginViewModel)
         {
             var result = _UserRepository.GetUser(new Models.Temp.UserModel { UserName = loginViewModel.UserName, Password = loginViewModel.Password });
             if (result == null)
                 return null;
-            return new LoginViewModel { UserName = result.UserName, Password = result.Password };
+            return result;
         }
+
     }
 }
