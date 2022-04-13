@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using SutekiTmp.Domain.Common.Authentication;
+using SutekiTmp.Domain.Common.Authentication.Session;
 using SutekiTmp.Domain.Service.IService;
 using System.Security.Claims;
 
@@ -99,9 +100,27 @@ namespace SutekiTmp.Controllers
         }
 
         [HttpPost]
-        public IActionResult LoginBySession(string UserName, string Password)
+        public async Task<IActionResult> LoginBySession(string UserName, string Password)
         {
-            return View();
+            var validUser = _LoginService.GetUser(new Viewmodels.Login.LoginViewModel
+            {
+                UserName = UserName,
+                Password = Password
+            });
+            if (validUser != null)
+            {
+                //聲明
+                Claim cname = new(ClaimTypes.Name, UserName);
+                //標示
+                ClaimsIdentity id = new(SessionAuthenticationOptions.Scheme);
+                id.AddClaim(cname);
+                //驗證主體
+                ClaimsPrincipal principal = new(id);
+                await HttpContext.SignInAsync(SessionAuthenticationOptions.Scheme, principal);
+                return View();
+            }
+
+            return Unauthorized();
         }
     }
 }

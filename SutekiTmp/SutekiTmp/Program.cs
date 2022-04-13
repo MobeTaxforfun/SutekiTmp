@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddSession(options =>
 {
-    options.Cookie.Name = "SessionCookie"; //Cookie Name
+    options.Cookie.Name = "suteki"; //Cookie Name
     options.Cookie.HttpOnly = true;    //XSS 之敵記得
 });
 builder.Services.AddControllersWithViews();
@@ -21,19 +21,9 @@ builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<ILoginService, LoginService>();
 builder.Services.AddOptions<SessionAuthenticationOptions>();
 
-builder.Services.AddAuthorization(opt =>
-{
-    opt.AddPolicy("demo2", c =>
-    {
-        c.AddAuthenticationSchemes(SessionAuthenticationHandler.TEST_SCHEM_NAME);
-        c.RequireAuthenticatedUser();
-    });
-});
-
 
 builder.Services.AddAuthentication(options =>
 {
-
     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
@@ -44,7 +34,7 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.SameSite = SameSiteMode.Lax; //CSRF 之敵可以參考一下，但不一定要
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
 })
-.AddJwtBearer(options => 
+.AddJwtBearer(options =>
 {
     options.RequireHttpsMetadata = false;
     options.TokenValidationParameters = new TokenValidationParameters()
@@ -56,9 +46,22 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("test"))
     };
 })
-.AddCustomAuthenticationOptions(option =>
+.AddSessionAuthenticationnOptions(option =>
 {
+    option.SessionKeyName = "UserId";   
+})
+.AddCustomAuthenticationOptions(option =>
+ {
 
+ });
+
+
+builder.Services.AddAuthorization(opt =>
+{
+    opt.AddPolicy("demo", c =>
+    {
+        c.RequireAuthenticatedUser();
+    });
 });
 
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SutekiTmp.Domain.Common.Authentication;
 using SutekiTmp.Models;
@@ -7,7 +8,7 @@ using System.Security.Claims;
 
 namespace SutekiTmp.Controllers
 {
-    
+
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -17,22 +18,25 @@ namespace SutekiTmp.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public IActionResult Index() => View();
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         public IActionResult CookieAuthIndex()
         {
             return View();
         }
 
-
         [Authorize(AuthenticationSchemes = CustomAuthenticationOptions.Scheme)]
         public IActionResult CustomAuthIndex()
         {
             var test = User.Claims.Where(c => c.Type == ClaimTypes.Email);
+            return View();
+        }
+
+        [Authorize("demo2")]
+        public IActionResult SessionAuthIndex()
+        {
+            var name = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
             return View();
         }
 

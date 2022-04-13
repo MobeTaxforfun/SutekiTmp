@@ -4,59 +4,35 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
 namespace SutekiTmp.Domain.Common.Authentication.Session
 {
-    public class SessionAuthenticationHandler : IAuthenticationSignInHandler
+    public class SessionAuthenticationHandler : AuthenticationHandler<SessionAuthenticationOptions>, IAuthenticationSignInHandler, IAuthenticationHandler
     {
-        public const string TEST_SCHEM_NAME = "some_authen";
-        public SessionAuthenticationOptions Options { get; private set; }
-
-        public SessionAuthenticationHandler(IOptions<SessionAuthenticationOptions> opt)
+        public SessionAuthenticationHandler(
+            IOptionsMonitor<SessionAuthenticationOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder,
+            ISystemClock clock) : base(options, logger, encoder, clock)
         {
-            Options = opt.Value;
+
         }
 
-        public HttpContext HttpContext { get; private set; }
-        public AuthenticationScheme Scheme { get; private set; }
-
-        public Task<AuthenticateResult> AuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (Scheme.Name != TEST_SCHEM_NAME)
+            if (!Context.Session.Keys.Contains(Options.SessionKeyName))
             {
-                return Task.FromResult(AuthenticateResult.Fail("不是這個驗證實體"));
+                return AuthenticateResult.Fail("無效的Session");
             }
-            // 再看Session
-            if (!HttpContext.Session.Keys.Contains(Options.SessionKeyName))
-            {
-                return Task.FromResult(AuthenticateResult.Fail("無效的Session"));
-            }
-            // 通過驗證
-            string un = HttpContext.Session.GetString(Options.SessionKeyName) ?? string.Empty;
-            ClaimsIdentity id = new(TEST_SCHEM_NAME);
-            id.AddClaim(new(ClaimTypes.Name, un));
-            ClaimsPrincipal prcp = new(id);
-            AuthenticationTicket ticket = new(prcp, TEST_SCHEM_NAME);
-            return Task.FromResult(AuthenticateResult.Success(ticket));
-        }
 
-        public Task ChallengeAsync(AuthenticationProperties? properties)
-        {
-            HttpContext.Response.Redirect($"{Options.LoginPath}?{Options.ReturnUrlKey}={HttpContext.Request.Path}");
-            return Task.CompletedTask;
-        }
-
-        public async Task ForbidAsync(AuthenticationProperties? properties)
-        {
-            await HttpContext.ForbidAsync(Scheme.Name);
-        }
-
-        public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
-        {
-            HttpContext = context;
-            Scheme = scheme;
-            return Task.CompletedTask;
+            string UserName = Context.Session.GetString(Options.SessionKeyName) ?? string.Empty;
+            ClaimsIdentity claimsIdentity = new(SessionAuthenticationOptions.Scheme);
+            claimsIdentity.AddClaim(new(ClaimTypes.Name, UserName));
+            ClaimsPrincipal claimsPrincipal = new(claimsIdentity);
+            AuthenticationTicket ticket = new(claimsPrincipal, SessionAuthenticationOptions.Scheme);
+            return AuthenticateResult.Success(ticket);
         }
 
         public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties? properties)
@@ -64,16 +40,16 @@ namespace SutekiTmp.Domain.Common.Authentication.Session
             string uname = user.Identity?.Name ?? string.Empty;
             if (!string.IsNullOrEmpty(uname))
             {
-                HttpContext.Session.SetString(Options.SessionKeyName, uname);
+                Context.Session.SetString(Options.SessionKeyName, uname);
             }
             return Task.CompletedTask;
         }
 
         public Task SignOutAsync(AuthenticationProperties? properties)
         {
-            if (HttpContext.Session.Keys.Contains(Options.SessionKeyName))
+            if (Context.Session.Keys.Contains(Options.SessionKeyName))
             {
-                HttpContext.Session.Remove(Options.SessionKeyName);
+                Context.Session.Remove(Options.SessionKeyName);
             }
             return Task.CompletedTask;
         }
