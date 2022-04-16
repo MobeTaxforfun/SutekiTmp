@@ -110,12 +110,14 @@ namespace SutekiTmp.Controllers
             if (validUser != null)
             {
                 //聲明
-                Claim cname = new(ClaimTypes.Name, UserName);
+                Claim claimName = new(ClaimTypes.Name, validUser.UserName);
+                Claim claimId = new("UserId", validUser.UserId.ToString());
                 //標示
-                ClaimsIdentity id = new(SessionAuthenticationOptions.Scheme);
-                id.AddClaim(cname);
+                ClaimsIdentity claimsIdentity = new(SessionAuthenticationOptions.Scheme);
+                claimsIdentity.AddClaim(claimName);
+                claimsIdentity.AddClaim(claimId);
                 //驗證主體
-                ClaimsPrincipal principal = new(id);
+                ClaimsPrincipal principal = new(claimsIdentity);
                 await HttpContext.SignInAsync(SessionAuthenticationOptions.Scheme, principal);
                 return View();
             }

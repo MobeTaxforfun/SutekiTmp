@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SutekiTmp.Domain.Common.Authentication;
+using SutekiTmp.Domain.Common.Authentication.Session;
 using SutekiTmp.Models;
 using System.Diagnostics;
 using System.Security.Claims;
@@ -33,7 +34,7 @@ namespace SutekiTmp.Controllers
             return View();
         }
 
-        [Authorize("demo2")]
+        [Authorize(AuthenticationSchemes = SessionAuthenticationOptions.Scheme)]
         public IActionResult SessionAuthIndex()
         {
             var name = User.Claims.First(c => c.Type == ClaimTypes.Name).Value;

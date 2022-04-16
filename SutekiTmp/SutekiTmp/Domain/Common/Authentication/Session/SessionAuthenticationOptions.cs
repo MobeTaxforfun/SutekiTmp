@@ -10,6 +10,7 @@ namespace SutekiTmp.Domain.Common.Authentication.Session
     {
         public const string Scheme = "SessionAuth";
         public PathString LoginPath { get; set; } = "/Home/Login";
-        public string SessionKeyName { get; set; } = "Uid";
+        public string SessionKeyName { get; set; } = "UserName";
+        public string SessionKeyId { get; set; } = "UId";
     }
 }

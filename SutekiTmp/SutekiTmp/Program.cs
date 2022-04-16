@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using SutekiTmp.Domain.Common.Authentication;
 using SutekiTmp.Domain.Common.Authentication.Session;
+using SutekiTmp.Domain.Common.Authorization;
+using SutekiTmp.Domain.Common.Authorization.Requirement;
 using SutekiTmp.Domain.Repository.IRepository;
 using SutekiTmp.Domain.Repository.Repository;
 using SutekiTmp.Domain.Service.IService;
@@ -17,9 +20,21 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;    //XSS 之敵記得
 });
 builder.Services.AddControllersWithViews();
+//HttpContex 的額外獲取方法
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+//Repository 注入
+builder.Services.AddTransient<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<ILoginService, LoginService>();
+builder.Services.AddTransient<IPromisionRepository, PromisionRepository>();
+builder.Services.AddTransient<IRoleMenuPromisionRepository, RoleMenuPromisionRepository>();
+builder.Services.AddTransient<IMeunRepository, MeunRepository>();
+//Custom方法注入
 builder.Services.AddOptions<SessionAuthenticationOptions>();
+builder.Services.AddSingleton<IAuthorizationHandler, MenuHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, MenuPerssionHanlder>();
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionsHandler>();
+
 
 
 builder.Services.AddAuthentication(options =>
@@ -48,7 +63,8 @@ builder.Services.AddAuthentication(options =>
 })
 .AddSessionAuthenticationnOptions(option =>
 {
-    option.SessionKeyName = "UserId";   
+    option.SessionKeyName = "UserName";
+    option.SessionKeyId = "UId";
 })
 .AddCustomAuthenticationOptions(option =>
  {
@@ -56,11 +72,15 @@ builder.Services.AddAuthentication(options =>
  });
 
 
-builder.Services.AddAuthorization(opt =>
+builder.Services.AddAuthorization(options =>
 {
-    opt.AddPolicy("demo", c =>
+    options.AddPolicy("Premission", policy =>
     {
-        c.RequireAuthenticatedUser();
+        policy.Requirements.Add(new PermissionsRequirement());
+    });
+    options.AddPolicy("Menu", policy =>
+    {
+        policy.Requirements.Add(new MenuRequirement());
     });
 });
 
@@ -83,6 +103,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllerRoute(

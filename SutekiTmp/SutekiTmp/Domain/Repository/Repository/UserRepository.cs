@@ -6,9 +6,7 @@ using SutekiTmp.Viewmodels.Login;
 namespace SutekiTmp.Domain.Repository.Repository
 {
     public class UserRepository : IUserRepository
-    {
-        
-
+    {      
         public UserRepository()
         {
 
