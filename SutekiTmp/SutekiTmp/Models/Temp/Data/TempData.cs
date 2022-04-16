@@ -20,18 +20,21 @@ namespace SutekiTmp.Models.Temp.Data
             meuns.Add(new MeunModel { MenuId = 2, MenuName = "權限管理" });
             meuns.Add(new MeunModel { MenuId = 3, MenuName = "訂單管理" });
 
+            promisions.Add(new PromisionModel { PromisionId = 0, PromisionCode = "Access", PromisionName = "請求" });
             promisions.Add(new PromisionModel { PromisionId = 1, PromisionCode = "View", PromisionName = "檢視" });
             promisions.Add(new PromisionModel { PromisionId = 2, PromisionCode = "Create", PromisionName = "新建" });
             promisions.Add(new PromisionModel { PromisionId = 3, PromisionCode = "Update", PromisionName = "更新" });
             promisions.Add(new PromisionModel { PromisionId = 4, PromisionCode = "Delete", PromisionName = "刪除" });
 
-            menuPromisions.Add(new RoleMenuPromision { RoleId = 1, PromisionId = 1 });
-            menuPromisions.Add(new RoleMenuPromision { RoleId = 1, PromisionId = 2 });
-            menuPromisions.Add(new RoleMenuPromision { RoleId = 1, PromisionId = 3 });
-            menuPromisions.Add(new RoleMenuPromision { RoleId = 1, PromisionId = 4 });
-            menuPromisions.Add(new RoleMenuPromision { RoleId = 2, PromisionId = 1 });
-            menuPromisions.Add(new RoleMenuPromision { RoleId = 2, PromisionId = 3 });
-            menuPromisions.Add(new RoleMenuPromision { RoleId = 3, PromisionId = 1 });
+            menuPromisions.Add(new RoleMenuPromision { RoleId = 1, PromisionId = 0, MenuId = 3 });
+            menuPromisions.Add(new RoleMenuPromision { RoleId = 1, PromisionId = 1, MenuId = 3 });
+            menuPromisions.Add(new RoleMenuPromision { RoleId = 1, PromisionId = 2, MenuId = 3 });
+            menuPromisions.Add(new RoleMenuPromision { RoleId = 1, PromisionId = 3, MenuId = 3 });
+            menuPromisions.Add(new RoleMenuPromision { RoleId = 1, PromisionId = 4, MenuId = 3 });
+            menuPromisions.Add(new RoleMenuPromision { RoleId = 2, PromisionId = 0, MenuId = 3 });
+            menuPromisions.Add(new RoleMenuPromision { RoleId = 2, PromisionId = 1, MenuId = 3 });
+            menuPromisions.Add(new RoleMenuPromision { RoleId = 2, PromisionId = 3, MenuId = 3 });
+            menuPromisions.Add(new RoleMenuPromision { RoleId = 3, PromisionId = 1, MenuId = 3 });
 
             userRoles.Add(new UserRoleModel { RuleId = 1, UserId = 1 });
             userRoles.Add(new UserRoleModel { RuleId = 2, UserId = 2 });

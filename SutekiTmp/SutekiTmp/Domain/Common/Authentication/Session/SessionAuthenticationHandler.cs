@@ -1,79 +1,76 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using SutekiTmp.Domain.Repository.IRepository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
 namespace SutekiTmp.Domain.Common.Authentication.Session
 {
-    public class SessionAuthenticationHandler : IAuthenticationSignInHandler
+    public class SessionAuthenticationHandler : AuthenticationHandler<SessionAuthenticationOptions>, IAuthenticationSignInHandler, IAuthenticationHandler
     {
-        public const string TEST_SCHEM_NAME = "some_authen";
-        public SessionAuthenticationOptions Options { get; private set; }
-
-        public SessionAuthenticationHandler(IOptions<SessionAuthenticationOptions> opt)
+        private readonly IUserRoleRepository _userRoleRepository;
+        public SessionAuthenticationHandler(
+            IOptionsMonitor<SessionAuthenticationOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder,
+            ISystemClock clock,
+            IUserRoleRepository userRoleRepository
+            ) : base(options, logger, encoder, clock)
         {
-            Options = opt.Value;
+            _userRoleRepository = userRoleRepository;
         }
 
-        public HttpContext HttpContext { get; private set; }
-        public AuthenticationScheme Scheme { get; private set; }
-
-        public Task<AuthenticateResult> AuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (Scheme.Name != TEST_SCHEM_NAME)
+            if (!Context.Session.Keys.Contains(Options.SessionKeyName))
             {
-                return Task.FromResult(AuthenticateResult.Fail("不是這個驗證實體"));
+                return AuthenticateResult.Fail("無效的Session");
             }
-            // 再看Session
-            if (!HttpContext.Session.Keys.Contains(Options.SessionKeyName))
+
+            string UserName = Context.Session.GetString(Options.SessionKeyName) ?? string.Empty;
+            string UserSessionId = Context.Session.GetString(Options.SessionKeyId) ?? string.Empty;
+
+            if (!Int32.TryParse(UserSessionId, out int UserId))
             {
-                return Task.FromResult(AuthenticateResult.Fail("無效的Session"));
+                return AuthenticateResult.Fail("尚未初始化的UserSessionId");
             }
-            // 通過驗證
-            string un = HttpContext.Session.GetString(Options.SessionKeyName) ?? string.Empty;
-            ClaimsIdentity id = new(TEST_SCHEM_NAME);
-            id.AddClaim(new(ClaimTypes.Name, un));
-            ClaimsPrincipal prcp = new(id);
-            AuthenticationTicket ticket = new(prcp, TEST_SCHEM_NAME);
-            return Task.FromResult(AuthenticateResult.Success(ticket));
-        }
 
-        public Task ChallengeAsync(AuthenticationProperties? properties)
-        {
-            HttpContext.Response.Redirect($"{Options.LoginPath}?{Options.ReturnUrlKey}={HttpContext.Request.Path}");
-            return Task.CompletedTask;
-        }
+            var RoleId = _userRoleRepository.GetRoleIdByUserId(UserId);
 
-        public async Task ForbidAsync(AuthenticationProperties? properties)
-        {
-            await HttpContext.ForbidAsync(Scheme.Name);
-        }
-
-        public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
-        {
-            HttpContext = context;
-            Scheme = scheme;
-            return Task.CompletedTask;
+            ClaimsIdentity claimsIdentity = new(SessionAuthenticationOptions.Scheme);
+            claimsIdentity.AddClaim(new(ClaimTypes.Name, UserName));
+            claimsIdentity.AddClaim(new("UserId", UserSessionId));
+            claimsIdentity.AddClaim(new("RoleId", RoleId.ToString()));
+            ClaimsPrincipal claimsPrincipal = new(claimsIdentity);
+            AuthenticationTicket ticket = new(claimsPrincipal, SessionAuthenticationOptions.Scheme);
+            return AuthenticateResult.Success(ticket);
         }
 
         public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties? properties)
         {
-            string uname = user.Identity?.Name ?? string.Empty;
-            if (!string.IsNullOrEmpty(uname))
+            string UserName = user.Identity?.Name ?? string.Empty;
+            string UserId = user.Claims.First(c => c.Type == "UserId").Value;
+            if (!string.IsNullOrEmpty(UserName))
             {
-                HttpContext.Session.SetString(Options.SessionKeyName, uname);
+                Context.Session.SetString(Options.SessionKeyName, UserName);
             }
+            if (!string.IsNullOrEmpty(UserId))
+            {
+                Context.Session.SetString(Options.SessionKeyId, UserId);
+            }
+
             return Task.CompletedTask;
         }
 
         public Task SignOutAsync(AuthenticationProperties? properties)
         {
-            if (HttpContext.Session.Keys.Contains(Options.SessionKeyName))
+            if (Context.Session.Keys.Contains(Options.SessionKeyName))
             {
-                HttpContext.Session.Remove(Options.SessionKeyName);
+                Context.Session.Remove(Options.SessionKeyName);
             }
             return Task.CompletedTask;
         }

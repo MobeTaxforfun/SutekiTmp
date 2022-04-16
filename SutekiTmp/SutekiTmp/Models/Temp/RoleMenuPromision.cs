@@ -9,5 +9,6 @@ namespace SutekiTmp.Models.Temp
     {
         public int RoleId { get; set; }
         public int PromisionId { get; set; }
+        public int MenuId { get; set; }
     }
 }
