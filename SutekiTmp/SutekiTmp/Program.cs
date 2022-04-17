@@ -12,6 +12,7 @@ using SutekiTmp.Domain.Repository.IRepository;
 using SutekiTmp.Domain.Repository.Repository;
 using SutekiTmp.Domain.Service.IService;
 using SutekiTmp.Domain.Service.Service;
+using SutekiTmp.Middleware;
 using System.Text;
 
 
@@ -123,6 +124,8 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
+
+    app.DemandService(builder.Services);
 
     app.MapControllerRoute(
         name: "default",
