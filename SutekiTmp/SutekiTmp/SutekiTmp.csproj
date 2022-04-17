@@ -9,6 +9,7 @@
   <ItemGroup>
     <Folder Include="Domain\Business\" />
     <Folder Include="Domain\Common\Authentication\Custom\" />
+    <Folder Include="Domain\Common\Global\" />
     <Folder Include="Middleware\" />
     <Folder Include="Models\Enum\" />
     <Folder Include="Models\Model\" />
@@ -17,6 +18,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.3" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.3" />
+    <PackageReference Include="Serilog" Version="2.10.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
+    <PackageReference Include="Serilog.Expressions" Version="3.3.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
   </ItemGroup>
 
