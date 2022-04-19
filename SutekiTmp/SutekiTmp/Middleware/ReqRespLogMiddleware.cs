@@ -13,7 +13,13 @@ namespace SutekiTmp.Middleware
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
         public ReqRespLogMiddleware(RequestDelegate next, ILogger<ReqRespLogMiddleware> logger)
         {
-            _next = next;
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             _logger = logger;
             _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
         }

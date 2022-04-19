@@ -107,7 +107,6 @@ try
 
     var app = builder.Build();
 
-    app.UseSession();
 
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
@@ -117,15 +116,35 @@ try
         app.UseHsts();
     }
 
+    app.Use(async (context, next) =>
+    {
+        await next();
+        //錯誤攔截器
+        switch(context.Response.StatusCode)
+        {
+            case 400:
+                context.Response.Redirect("/Error/HttpError400"); //400 Bad request
+                return;
+            case 401:
+                context.Response.Redirect("/Error/HttpError401"); //401 Unauthorized
+                return;
+            case 403:
+                context.Response.Redirect("/Error/HttpError400"); //403 Forbidden
+                return;
+        }
+    });
+
     app.UseHttpsRedirection();
     app.UseStaticFiles();
 
     app.UseRouting();
 
+    app.UseSession();
     app.UseAuthentication();
     app.UseAuthorization();
 
-    app.DemandService(builder.Services);
+    app.DemandService(builder.Services);    // 專案元件查詢方法
+    app.DemandController();                 // 專案元件查詢方法
 
     app.MapControllerRoute(
         name: "default",
