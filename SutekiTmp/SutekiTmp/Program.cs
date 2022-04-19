@@ -8,6 +8,7 @@ using SutekiTmp.Domain.Common.Authentication;
 using SutekiTmp.Domain.Common.Authentication.Session;
 using SutekiTmp.Domain.Common.Authorization;
 using SutekiTmp.Domain.Common.Authorization.Requirement;
+using SutekiTmp.Domain.Common.Extensions;
 using SutekiTmp.Domain.Repository.IRepository;
 using SutekiTmp.Domain.Repository.Repository;
 using SutekiTmp.Domain.Service.IService;
@@ -104,6 +105,7 @@ try
         });
     });
 
+    builder.Services.AddSwaggerSetup();
 
     var app = builder.Build();
 
@@ -138,6 +140,14 @@ try
     app.UseStaticFiles();
 
     app.UseRouting();
+
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint($"/swagger/v1/swagger.json", "APIDocumentV1");
+        options.SwaggerEndpoint($"/swagger/v2/swagger.json", "APIDocumentV2");
+        options.RoutePrefix = String.Empty;
+    });
 
     app.UseSession();
     app.UseAuthentication();
