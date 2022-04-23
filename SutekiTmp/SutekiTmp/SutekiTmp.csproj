@@ -7,9 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\UserManager\Controllers\" />
+    <Folder Include="Areas\UserManager\Data\" />
+    <Folder Include="Areas\UserManager\Models\" />
+    <Folder Include="Areas\UserManager\Views\" />
     <Folder Include="Domain\Business\" />
     <Folder Include="Domain\Common\Authentication\Custom\" />
-    <Folder Include="Domain\Common\Global\" />
     <Folder Include="Models\Enum\" />
     <Folder Include="Models\Model\" />
   </ItemGroup>

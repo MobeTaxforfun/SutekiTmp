@@ -122,7 +122,7 @@ try
     {
         await next();
         //¿ù»~ÄdºI¾¹
-        switch(context.Response.StatusCode)
+        switch (context.Response.StatusCode)
         {
             case 400:
                 context.Response.Redirect("/Error/HttpError400"); //400 Bad request
@@ -159,6 +159,19 @@ try
     app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllerRoute(
+            name: "default",
+            pattern: "{controller=Home}/{action=Index}/{id?}"
+        );
+
+        endpoints.MapControllerRoute(
+          name: "areas",
+          pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+        );
+    });
 
     app.Run();
 }

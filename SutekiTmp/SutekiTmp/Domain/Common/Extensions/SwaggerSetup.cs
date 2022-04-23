@@ -16,16 +16,16 @@ namespace SutekiTmp.Domain.Common.Extensions
                         Version = "v1",
                         Title = "ToDo API1",
                         Description = "An ASP.NET Core Web API for managing ToDo items",
-                        TermsOfService = new Uri("https://example.com/terms"),
+                        TermsOfService = new Uri("https://swagger.io/"),
                         Contact = new OpenApiContact
                         {
                             Name = "Example Contact",
-                            Url = new Uri("https://example.com/contact")
+                            Url = new Uri("https://swagger.io/")
                         },
                         License = new OpenApiLicense
                         {
                             Name = "Example License",
-                            Url = new Uri("https://example.com/license")
+                            Url = new Uri("https://swagger.io/")
                         }
                     });
                 options.SwaggerDoc(
@@ -35,16 +35,16 @@ namespace SutekiTmp.Domain.Common.Extensions
                         Version = "v2",
                         Title = "ToDo API2",
                         Description = "An ASP.NET Core Web API for managing ToDo items",
-                        TermsOfService = new Uri("https://example.com/terms"),
+                        TermsOfService = new Uri("https://swagger.io/"),
                         Contact = new OpenApiContact
                         {
                             Name = "Example Contact",
-                            Url = new Uri("https://example.com/contact")
+                            Url = new Uri("https://swagger.io/")
                         },
                         License = new OpenApiLicense
                         {
                             Name = "Example License",
-                            Url = new Uri("https://example.com/license")
+                            Url = new Uri("https://swagger.io/")
                         }
                     });
             });
