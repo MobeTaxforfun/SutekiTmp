@@ -8,6 +8,7 @@ using SutekiTmp.Domain.Common.Authentication;
 using SutekiTmp.Domain.Common.Authentication.Session;
 using SutekiTmp.Domain.Common.Authorization;
 using SutekiTmp.Domain.Common.Authorization.Requirement;
+using SutekiTmp.Domain.Common.Extensions;
 using SutekiTmp.Domain.Repository.IRepository;
 using SutekiTmp.Domain.Repository.Repository;
 using SutekiTmp.Domain.Service.IService;
@@ -104,6 +105,7 @@ try
         });
     });
 
+    builder.Services.AddSwaggerSetup();
 
     var app = builder.Build();
 
@@ -120,7 +122,7 @@ try
     {
         await next();
         //¿ù»~ÄdºI¾¹
-        switch(context.Response.StatusCode)
+        switch (context.Response.StatusCode)
         {
             case 400:
                 context.Response.Redirect("/Error/HttpError400"); //400 Bad request
@@ -139,6 +141,14 @@ try
 
     app.UseRouting();
 
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint($"/swagger/v1/swagger.json", "APIDocumentV1");
+        options.SwaggerEndpoint($"/swagger/v2/swagger.json", "APIDocumentV2");
+        options.RoutePrefix = String.Empty;
+    });
+
     app.UseSession();
     app.UseAuthentication();
     app.UseAuthorization();
@@ -149,6 +159,19 @@ try
     app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllerRoute(
+            name: "default",
+            pattern: "{controller=Home}/{action=Index}/{id?}"
+        );
+
+        endpoints.MapControllerRoute(
+          name: "areas",
+          pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+        );
+    });
 
     app.Run();
 }
