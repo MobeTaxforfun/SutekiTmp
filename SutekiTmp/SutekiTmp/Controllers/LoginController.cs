@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SutekiTmp.Domain.Common.Authentication;
 using SutekiTmp.Domain.Common.Authentication.Session;
 using SutekiTmp.Domain.Service.IService;
+using SutekiTmp.Viewmodels.Login;
 using System.Security.Claims;
 
 namespace SutekiTmp.Controllers
@@ -23,7 +24,7 @@ namespace SutekiTmp.Controllers
         }
 
         [HttpPost]
-        public IActionResult LoginByJWT(string UserName, string Password)
+        public IActionResult LoginByJWT(LoginViewModel model)
         {
             return View();
         }
