@@ -142,12 +142,14 @@ try
     app.UseRouting();
 
     app.UseSwagger();
+
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint($"/swagger/v1/swagger.json", "APIDocumentV1");
         options.SwaggerEndpoint($"/swagger/v2/swagger.json", "APIDocumentV2");
-        options.RoutePrefix = String.Empty;
+        options.RoutePrefix = "Myapi/Swagger";
     });
+
 
     app.UseSession();
     app.UseAuthentication();
