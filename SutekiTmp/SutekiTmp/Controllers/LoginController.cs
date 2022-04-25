@@ -18,65 +18,56 @@ namespace SutekiTmp.Controllers
             _LoginService = loginService;
         }
 
-        public IActionResult LoginByJWT()
+        public ActionResult Index()
         {
             return View();
         }
 
         [HttpPost]
-        public IActionResult LoginByJWT(LoginViewModel model)
+        public IActionResult LoginByCookieAuth(LoginViewModel model)
         {
-            return View();
-        }
-
-        public IActionResult LoginByCookieAuth()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult LoginByCookieAuth(string UserName, string Password)
-        {
-            var validUser = _LoginService.GetUser(new Viewmodels.Login.LoginViewModel
+            if(ModelState.IsValid)
             {
-                UserName = UserName,
-                Password = Password
-            });
-
-            if (validUser != null)
-            {
-
-                List<Claim> claims = new List<Claim>()
+                var validUser = _LoginService.GetUser(new Viewmodels.Login.LoginViewModel
                 {
-                    new Claim(ClaimTypes.Name,UserName),
+                    UserName = model.UserName,
+                    Password = model.Password
+                });
+
+                if (validUser != null)
+                {
+
+                    List<Claim> claims = new List<Claim>()
+                {
+                    new Claim(ClaimTypes.Name,model.UserName),
                     new Claim(ClaimTypes.Email,validUser.Email),
                 };
 
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var properties = new AuthenticationProperties
-                {
-                    IsPersistent = true
-                };
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var properties = new AuthenticationProperties
+                    {
+                        IsPersistent = true
+                    };
 
-                HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), properties);
+                    HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), properties);
+                    return View();
+                }
+
+                return Unauthorized();
+            }   
+            else
+            {
                 return View();
             }
-
-            return Unauthorized();
-        }
-
-        public IActionResult LoginByCustomAuth()
-        {
-            return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> LoginByCustomAuth(string UserName, string Password)
+        public async Task<IActionResult> LoginByCustomAuth(LoginViewModel model)
         {
             var validUser = _LoginService.GetUser(new Viewmodels.Login.LoginViewModel
             {
-                UserName = UserName,
-                Password = Password
+                UserName = model.UserName,
+                Password = model.Password
             });
 
             if (validUser != null)
@@ -94,19 +85,13 @@ namespace SutekiTmp.Controllers
             return Unauthorized();
         }
 
-
-        public IActionResult LoginBySession()
-        {
-            return View();
-        }
-
         [HttpPost]
-        public async Task<IActionResult> LoginBySession(string UserName, string Password)
+        public async Task<IActionResult> LoginBySession(LoginViewModel model)
         {
             var validUser = _LoginService.GetUser(new Viewmodels.Login.LoginViewModel
             {
-                UserName = UserName,
-                Password = Password
+                UserName = model.UserName,
+                Password = model.Password
             });
             if (validUser != null)
             {
