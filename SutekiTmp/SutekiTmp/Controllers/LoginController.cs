@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using SutekiTmp.Domain.Common.Attributes;
 using SutekiTmp.Domain.Common.Authentication;
 using SutekiTmp.Domain.Common.Authentication.Session;
 using SutekiTmp.Domain.Service.IService;
@@ -24,9 +25,10 @@ namespace SutekiTmp.Controllers
         }
 
         [HttpPost]
+        [ValidateModel]
         public IActionResult LoginByCookieAuth(LoginViewModel model)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 var validUser = _LoginService.GetUser(new Viewmodels.Login.LoginViewModel
                 {
@@ -52,9 +54,13 @@ namespace SutekiTmp.Controllers
                     HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), properties);
                     return View();
                 }
-
-                return Unauthorized();
-            }   
+                else
+                {
+                    //return Unauthorized();
+                    this.ModelState.AddModelError("", "帳號密碼錯誤");
+                    return View("Index", model);
+                }
+            }
             else
             {
                 return View();
