@@ -12,11 +12,11 @@ namespace SutekiTmp.Controllers
 {
     public class LoginController : Controller
     {
-        private readonly ILoginService _LoginService;
+        private readonly ILoginService loginService;
 
         public LoginController(ILoginService loginService)
         {
-            _LoginService = loginService;
+            this.loginService = loginService;
         }
 
         public ActionResult Index()
@@ -28,90 +28,91 @@ namespace SutekiTmp.Controllers
         [ValidateModel]
         public IActionResult LoginByCookieAuth(LoginViewModel model)
         {
-            if (ModelState.IsValid)
+
+            var CurrentUser = loginService.GetUserByUserNameAndPassWord(model.UserName, model.Password);
+            if (CurrentUser != null)
             {
-                var validUser = _LoginService.GetUser(new Viewmodels.Login.LoginViewModel
-                {
-                    UserName = model.UserName,
-                    Password = model.Password
-                });
 
-                if (validUser != null)
-                {
-
-                    List<Claim> claims = new List<Claim>()
-                {
-                    new Claim(ClaimTypes.Name,model.UserName),
-                    new Claim(ClaimTypes.Email,validUser.Email),
-                };
-
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var properties = new AuthenticationProperties
+                List<Claim> claims = new List<Claim>()
                     {
-                        IsPersistent = true
+                        new Claim(ClaimTypes.Name,CurrentUser.Name),
+                        new Claim(ClaimTypes.Email,CurrentUser.Email),
+                        new Claim(ClaimTypes.MobilePhone,CurrentUser.Phone),
+                        new Claim("UserName",CurrentUser.UserName),
+                        new Claim("UserId",CurrentUser.UserId.ToString())
                     };
 
-                    HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), properties);
-                    return View();
-                }
-                else
-                {
-                    //return Unauthorized();
-                    this.ModelState.AddModelError("", "帳號密碼錯誤");
-                    return View("Index", model);
-                }
-            }
-            else
-            {
-                return View();
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> LoginByCustomAuth(LoginViewModel model)
-        {
-            var validUser = _LoginService.GetUser(new Viewmodels.Login.LoginViewModel
-            {
-                UserName = model.UserName,
-                Password = model.Password
-            });
-
-            if (validUser != null)
-            {
-                var claimIdentity = new ClaimsIdentity(CustomAuthenticationOptions.Scheme);
-                claimIdentity.AddClaim(new Claim("UserId", validUser.UserId.ToString()));
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var properties = new AuthenticationProperties
                 {
                     IsPersistent = true
                 };
-                await HttpContext.SignInAsync(CustomAuthenticationOptions.Scheme, new ClaimsPrincipal(claimIdentity));
+
+                HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), properties);
                 return View();
+            }
+            else
+            {
+                //return Unauthorized();
+                this.ModelState.AddModelError("", "帳號密碼錯誤");
+                return View("Index", model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateModel]
+        public async Task<IActionResult> LoginByCustomAuth(LoginViewModel model)
+        {
+            var CurrentUser = loginService.GetUserByUserNameAndPassWord(model.UserName, model.Password);
+
+            if (CurrentUser != null)
+            {
+                List<Claim> claims = new List<Claim>()
+                {
+                    new Claim(ClaimTypes.Name,CurrentUser.Name),
+                    new Claim(ClaimTypes.Email,CurrentUser.Email),
+                    new Claim(ClaimTypes.MobilePhone,CurrentUser.Phone),
+                    new Claim("UserName",CurrentUser.UserName),
+                    new Claim("UserId",CurrentUser.UserId.ToString())
+                };
+
+                var claimIdentity = new ClaimsIdentity(claims, CustomAuthenticationOptions.Scheme);
+
+                var properties = new AuthenticationProperties
+                {
+                    IsPersistent = true
+                };
+                await HttpContext.SignInAsync(CustomAuthenticationOptions.Scheme, new ClaimsPrincipal(claimIdentity), properties);
+                return RedirectToAction("Index", "Home");
             }
 
             return Unauthorized();
         }
 
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> LoginBySession(LoginViewModel model)
         {
-            var validUser = _LoginService.GetUser(new Viewmodels.Login.LoginViewModel
+            var CurrentUser = loginService.GetUserByUserNameAndPassWord(model.UserName, model.Password);
+            if (CurrentUser != null)
             {
-                UserName = model.UserName,
-                Password = model.Password
-            });
-            if (validUser != null)
-            {
-                //聲明
-                Claim claimName = new(ClaimTypes.Name, validUser.UserName);
-                Claim claimId = new("UserId", validUser.UserId.ToString());
-                //標示
-                ClaimsIdentity claimsIdentity = new(SessionAuthenticationOptions.Scheme);
-                claimsIdentity.AddClaim(claimName);
-                claimsIdentity.AddClaim(claimId);
-                //驗證主體
-                ClaimsPrincipal principal = new(claimsIdentity);
-                await HttpContext.SignInAsync(SessionAuthenticationOptions.Scheme, principal);
-                return View();
+                List<Claim> claims = new List<Claim>()
+                {
+                    new Claim(ClaimTypes.Name,CurrentUser.Name),
+                    new Claim(ClaimTypes.Email,CurrentUser.Email),
+                    new Claim(ClaimTypes.MobilePhone,CurrentUser.Phone),
+                    new Claim("UserName",CurrentUser.UserName),
+                    new Claim("UserId",CurrentUser.UserId.ToString(),ClaimValueTypes.Integer32)
+                };
+
+                var claimIdentity = new ClaimsIdentity(claims, SessionAuthenticationOptions.Scheme);
+
+                var properties = new AuthenticationProperties
+                {
+                    IsPersistent = true
+                };
+                await HttpContext.SignInAsync(SessionAuthenticationOptions.Scheme, new ClaimsPrincipal(claimIdentity), properties);
+                return RedirectToAction("Index", "Home");
             }
 
             return Unauthorized();

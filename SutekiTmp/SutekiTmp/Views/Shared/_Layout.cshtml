@@ -25,15 +25,8 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Login
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="@Url.Action("LoginByCookieAuth","Login")">LoginByCookieAuth</a></li>
-                                <li><a class="dropdown-item" href="@Url.Action("LoginByCustomAuth","Login")">LoginByCustomAuth</a></li>
-                                <li><a class="dropdown-item" href="@Url.Action("LoginBySession","Login")">LoginBySession</a></li>
-                            </ul>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Login" asp-action="Index">Login</a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -44,6 +37,9 @@
                                 <li><a class="dropdown-item" href="@Url.Action("CustomAuthIndex","Home")">LoginByCustomAuth</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("SessionAuthIndex","Home")">LoginBySession</a></li>
                             </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Product</a>
                         </li>
                     </ul>
                 </div>

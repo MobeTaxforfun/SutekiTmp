@@ -12,18 +12,23 @@ namespace SutekiTmp.Domain.Common.Authentication.Session
 {
     public class SessionAuthenticationHandler : AuthenticationHandler<SessionAuthenticationOptions>, IAuthenticationSignInHandler, IAuthenticationHandler
     {
-        private readonly IUserRoleRepository _userRoleRepository;
+        private readonly IUserRepository userRepository;
+
         public SessionAuthenticationHandler(
             IOptionsMonitor<SessionAuthenticationOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
-            IUserRoleRepository userRoleRepository
+            IUserRepository userRepository
             ) : base(options, logger, encoder, clock)
         {
-            _userRoleRepository = userRoleRepository;
+            this.userRepository = userRepository;
         }
 
+        /// <summary>
+        /// 驗證邏輯
+        /// </summary>
+        /// <returns></returns>
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             if (!Context.Session.Keys.Contains(Options.SessionKeyName))
@@ -39,17 +44,37 @@ namespace SutekiTmp.Domain.Common.Authentication.Session
                 return AuthenticateResult.Fail("尚未初始化的UserSessionId");
             }
 
-            var RoleId = _userRoleRepository.GetRoleIdByUserId(UserId);
 
-            ClaimsIdentity claimsIdentity = new(SessionAuthenticationOptions.Scheme);
-            claimsIdentity.AddClaim(new(ClaimTypes.Name, UserName));
-            claimsIdentity.AddClaim(new("UserId", UserSessionId));
-            claimsIdentity.AddClaim(new("RoleId", RoleId.ToString()));
+            var CurrentUser = userRepository.GetUserById(UserId);
+            if (CurrentUser == null)
+            {
+                return AuthenticateResult.Fail("找不到這個使用者");
+            }
+
+
+            List<Claim> claims = new List<Claim>()
+                    {
+                        new Claim(ClaimTypes.Name,CurrentUser.Name),
+                        new Claim(ClaimTypes.Email,CurrentUser.Email),
+                        new Claim(ClaimTypes.MobilePhone,CurrentUser.Phone),
+                        new Claim("UserName",CurrentUser.UserName),
+                        new Claim("UserId",CurrentUser.UserId.ToString(),ClaimValueTypes.Integer32),
+                        new Claim(ClaimTypes.Role,CurrentUser.Roles.FirstOrDefault().RoleId.ToString(),ClaimValueTypes.Integer32)
+                    };
+            ClaimsIdentity claimsIdentity = new(claims, SessionAuthenticationOptions.Scheme);
+
+
             ClaimsPrincipal claimsPrincipal = new(claimsIdentity);
             AuthenticationTicket ticket = new(claimsPrincipal, SessionAuthenticationOptions.Scheme);
             return AuthenticateResult.Success(ticket);
         }
 
+        /// <summary>
+        /// 登入
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="properties"></param>
+        /// <returns></returns>
         public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties? properties)
         {
             string UserName = user.Identity?.Name ?? string.Empty;
@@ -66,6 +91,11 @@ namespace SutekiTmp.Domain.Common.Authentication.Session
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// 登出
+        /// </summary>
+        /// <param name="properties"></param>
+        /// <returns></returns>
         public Task SignOutAsync(AuthenticationProperties? properties)
         {
             if (Context.Session.Keys.Contains(Options.SessionKeyName))
@@ -74,5 +104,12 @@ namespace SutekiTmp.Domain.Common.Authentication.Session
             }
             return Task.CompletedTask;
         }
+
+        public Task ChallengeAsync(AuthenticationProperties properties)
+        {
+            Context.Response.Redirect("/login");
+            return Task.CompletedTask;
+        }
+
     }
 }

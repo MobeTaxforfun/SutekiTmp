@@ -25,29 +25,27 @@ namespace SutekiTmp.Domain.Common.Authentication
         public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties? properties)
         {
             var ticket = new AuthenticationTicket(user, properties, Scheme.Name);
-            var UserId = user.Claims.First(c=>c.Type == "UserId").Value;
-            Context.Session.SetString("IsAuth", "true");
+
+            //登入的邏輯
 
             return Task.CompletedTask;
         }
 
         public Task SignOutAsync(AuthenticationProperties? properties)
         {
-            Context.Response.Cookies.Delete("myCookie");
+            //登出的邏輯
+
             return Task.CompletedTask;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
 
-            var IsAuth = Context.Session.GetString("IsAuth");
-
             var claimIdentity = new ClaimsIdentity(CustomAuthenticationOptions.Scheme);
-            claimIdentity.AddClaim(new Claim(ClaimTypes.Email, "mobe@gmail.com"));
             var principal = new ClaimsPrincipal(claimIdentity);
             var ticket = new AuthenticationTicket(principal, CustomAuthenticationOptions.Scheme);
 
-            var endpoint = Context.Features.Get<IEndpointFeature>()?.Endpoint;
+            //驗證的邏輯
 
             return AuthenticateResult.Success(ticket);
         }

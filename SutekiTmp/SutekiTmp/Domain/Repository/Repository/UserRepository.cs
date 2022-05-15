@@ -1,4 +1,6 @@
-﻿using SutekiTmp.Domain.Repository.IRepository;
+﻿using Microsoft.EntityFrameworkCore;
+using SutekiTmp.Domain.Repository.IRepository;
+using SutekiTmp.Models.Entity;
 using SutekiTmp.Models.Temp;
 using SutekiTmp.Models.Temp.Data;
 using SutekiTmp.Viewmodels.Login;
@@ -6,16 +8,43 @@ using SutekiTmp.Viewmodels.Login;
 namespace SutekiTmp.Domain.Repository.Repository
 {
     public class UserRepository : IUserRepository
-    {      
-        public UserRepository()
-        {
+    {
+        private readonly TempDataContext context;
 
+        public UserRepository(TempDataContext context)
+        {
+            this.context = context;
         }
 
-        public UserModel GetUser(UserModel userModel)
+
+        public User? GetUserById(int Id)
         {
-            return TempData.users.FirstOrDefault(x => x.UserName.ToLower() == userModel.UserName.ToLower()
-                                          && x.Password == userModel.Password);
+            return context.Users.Include(c => c.Roles).FirstOrDefault(c => c.UserId == Id);
+        }
+
+        public User? GetUserByUserNameAndPassWord(string UserName, string PassWord)
+        {
+
+            var result = context.Users.FirstOrDefault(c => c.UserName == UserName && c.PassWord == PassWord);
+            if (result == null)
+            {
+                return result;
+            }
+            context.Entry(result).Collection(c => c.Roles).Load();
+            return result;
+        }
+
+        public List<Role> ListedUserRolesByUserId(int Id)
+        {
+            var user = context.Users.Find(Id);
+            if (user == null)
+            {
+                return null;
+            }
+            else
+            {
+                return user.Roles.ToList();
+            }
         }
     }
 }

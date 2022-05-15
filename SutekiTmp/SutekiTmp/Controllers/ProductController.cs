@@ -5,7 +5,7 @@ using SutekiTmp.Domain.Common.Authentication.Session;
 
 namespace SutekiTmp.Controllers
 {
-    [Authorize(AuthenticationSchemes = SessionAuthenticationOptions.Scheme)]
+    [Authorize(AuthenticationSchemes = SessionAuthenticationOptions.Scheme,Policy = "Premission")]
     [Menu("訂單管理")]
     public class ProductController : Controller
     {

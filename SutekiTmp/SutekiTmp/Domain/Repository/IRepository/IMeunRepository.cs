@@ -1,7 +1,10 @@
-﻿namespace SutekiTmp.Domain.Repository.IRepository
+﻿using SutekiTmp.Models.Entity;
+
+namespace SutekiTmp.Domain.Repository.IRepository
 {
     public interface IMeunRepository
     {
-        int GetMenuIdByMenuName(string menuName);
+        public int GetMenuIdByMenuName(string menuName);
+        public Menu GetMenuByMenuName(string MenuName);
     }
 }

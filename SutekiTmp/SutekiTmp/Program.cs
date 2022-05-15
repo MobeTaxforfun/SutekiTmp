@@ -14,6 +14,7 @@ using SutekiTmp.Domain.Repository.Repository;
 using SutekiTmp.Domain.Service.IService;
 using SutekiTmp.Domain.Service.Service;
 using SutekiTmp.Middleware;
+using SutekiTmp.Models.Entity;
 using System.Text;
 
 
@@ -43,20 +44,19 @@ try
         options.Cookie.HttpOnly = true;    //XSS 之敵記得
     });
     builder.Services.AddControllersWithViews();
+    builder.Services.AddDbContext<TempDataContext>();
     //HttpContex 的額外獲取方法
     builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
     //Repository 注入
-    builder.Services.AddTransient<IUserRoleRepository, UserRoleRepository>();
+    builder.Services.AddTransient<IRoleRepository, RoleRepository>();
     builder.Services.AddTransient<IUserRepository, UserRepository>();
     builder.Services.AddTransient<ILoginService, LoginService>();
-    builder.Services.AddTransient<IPromisionRepository, PromisionRepository>();
-    builder.Services.AddTransient<IRoleMenuPromisionRepository, RoleMenuPromisionRepository>();
     builder.Services.AddTransient<IMeunRepository, MeunRepository>();
+
     //Custom方法注入
     builder.Services.AddOptions<SessionAuthenticationOptions>();
-    builder.Services.AddSingleton<IAuthorizationHandler, MenuHandler>();
-    builder.Services.AddSingleton<IAuthorizationHandler, MenuPerssionHanlder>();
-    builder.Services.AddSingleton<IAuthorizationHandler, PermissionsHandler>();
+    builder.Services.AddTransient<IAuthorizationHandler, PermissionsHandler>();
 
     builder.Services.AddAuthentication(options =>
     {
@@ -99,10 +99,6 @@ try
         {
             policy.Requirements.Add(new PermissionsRequirement());
         });
-        options.AddPolicy("Menu", policy =>
-        {
-            policy.Requirements.Add(new MenuRequirement());
-        });
     });
 
     builder.Services.AddSwaggerSetup();
@@ -125,13 +121,16 @@ try
         switch (context.Response.StatusCode)
         {
             case 400:
-                context.Response.Redirect("/Error/HttpError400"); //400 Bad request
+                await context.Response.WriteAsync("404");
+                //context.Response.Redirect("/Error/HttpError400"); //400 Bad request
                 return;
             case 401:
-                context.Response.Redirect("/Error/HttpError401"); //401 Unauthorized
+                await context.Response.WriteAsync("401");
+                //context.Response.Redirect("/Error/HttpError401"); //401 Unauthorized
                 return;
             case 403:
-                context.Response.Redirect("/Error/HttpError400"); //403 Forbidden
+                await context.Response.WriteAsync("403");
+                //context.Response.Redirect("/Error/HttpError400"); //403 Forbidden
                 return;
         }
     });
